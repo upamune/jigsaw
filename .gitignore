@@ -26,3 +26,5 @@
 # End of https://www.toptal.com/developers/gitignore/api/go
 
 .envrc
+config.yaml
+
