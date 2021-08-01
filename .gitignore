@@ -28,3 +28,4 @@
 .envrc
 config.yaml
 
+*.json
