@@ -1,0 +1,6 @@
+@startuml
+"v1-service" -> "v2-service": Ping Request
+"v1-service" <-- "v2-service": Ping Response
+"v2-service" -> "v3-service": Pong Request
+"v2-service" <-- "v3-service": Pong Response
+@enduml

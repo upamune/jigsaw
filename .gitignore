@@ -27,5 +27,7 @@
 
 .envrc
 config.yaml
-
 *.json
+
+!example/config.yaml
+!example/trace.json
