@@ -1,4 +1,4 @@
-## dd-trace-to-sequence-diagram
+## jigsaw
 
 ### Usage
 

@@ -1,4 +1,4 @@
-module github.com/upamune/dd-trace-to-sequence-diagram
+module github.com/upamune/jigsaw
 
 go 1.16
 
