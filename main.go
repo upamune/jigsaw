@@ -14,6 +14,7 @@ var (
 	Revision string
 
 	configPath = flag.String("config", "config.yaml", "path of config")
+	noResponse = flag.Bool("no-response", false, "whether to draw response sequences")
 )
 
 func main() {

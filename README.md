@@ -2,6 +2,8 @@
 
 ### Example
 
+#### w/ response
+
 ```bash
 $ jigsaw -config ./example/config.yaml ./example/trace.json
 @startuml
@@ -13,6 +15,18 @@ $ jigsaw -config ./example/config.yaml ./example/trace.json
 ```
 
 ![output](https://user-images.githubusercontent.com/8219560/127774843-107403dc-53a6-472e-aac6-60fb30b6ff36.png)
+
+#### w/o response
+
+```bash
+$ jigsaw -config ./example/config.yaml -no-response ./example/trace.json
+@startuml
+"v1-service" -> "v2-service": Ping Request
+"v2-service" -> "v3-service": Pong Request
+@enduml
+```
+
+![output](https://user-images.githubusercontent.com/8219560/127775036-b13113ff-496c-489c-8b1d-a6a756c62d97.png)
 
 ### Usage
 

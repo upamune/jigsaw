@@ -28,6 +28,9 @@ func buildUML(conf config, spans []*span) (string, error) {
 
 		method := path.Base(s.Meta.GRPCFullMethodName)
 		w(fmt.Sprintf(`"%s" -> "%s": %s Request`, caller, callee, method))
+		if *noResponse {
+			continue
+		}
 		w(fmt.Sprintf(`"%s" <-- "%s": %s Response`, caller, callee, method))
 	}
 	w("@enduml")
