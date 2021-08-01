@@ -3,7 +3,8 @@
 ### Usage
 
 ```bash
-$ go run . trace.json -c config.yaml
+$ go get -u github.com/upamune/jigsaw
+$ jigsaw trace.json -c config.yaml
 ```
 
 ```bash
@@ -17,4 +18,3 @@ grpc_serivce_alias:
   /foo.bar.v1.Service: v1-serivce
   /foo.bar.v2.Service: v2-serivce
 ```
-

@@ -10,6 +10,9 @@ import (
 )
 
 var (
+	Version  string
+	Revision string
+
 	configPath = flag.String("config", "config.yaml", "path of config")
 )
 
