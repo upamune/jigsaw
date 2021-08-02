@@ -1,5 +1,9 @@
 ## jigsaw
 
+Automatically generate a sequence diagram from JSON of Trace in Datadog. 
+
+⚠️ Only gRPC calls appear in the sequence diagram.
+
 ### Example
 
 #### w/ response
