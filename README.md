@@ -8,13 +8,14 @@
 $ jigsaw -config ./example/config.yaml ./example/trace.json
 @startuml
 "v1-service" -> "v2-service": Ping Request
-"v1-service" <-- "v2-service": Ping Response
 "v2-service" -> "v3-service": Pong Request
 "v2-service" <-- "v3-service": Pong Response
+"v1-service" <-- "v2-service": Ping Response
 @enduml
 ```
 
-![output](https://user-images.githubusercontent.com/8219560/127774843-107403dc-53a6-472e-aac6-60fb30b6ff36.png)
+![output](https://user-images.githubusercontent.com/8219560/127803698-763b9343-5429-417a-89b9-492e88ed08ff.png)
+
 
 #### w/o response
 
@@ -29,6 +30,8 @@ $ jigsaw -config ./example/config.yaml -no-response ./example/trace.json
 ![output](https://user-images.githubusercontent.com/8219560/127775036-b13113ff-496c-489c-8b1d-a6a756c62d97.png)
 
 ### Usage
+
+You can get a trace as a JSON via `https://app.datadoghq.com/api/v1/trace/TRACE_ID`.
 
 ```bash
 $ go get -u github.com/upamune/jigsaw

@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 	"path"
-	"sort"
 )
 
 var (
@@ -43,12 +42,9 @@ func run() error {
 		return err
 	}
 
-	ss := filterSpans(c, spans)
-	sort.Slice(ss, func(i, j int) bool {
-		return ss[i].Start < ss[j].Start
-	})
+	resolvedSpans := resolveSpans(spans)
 
-	s, err := buildUML(c, ss)
+	s, err := buildUML(c, resolvedSpans)
 	if err != nil {
 		return err
 	}

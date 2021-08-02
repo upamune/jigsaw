@@ -10,10 +10,10 @@ func buildUML(conf config, spans []*span) (string, error) {
 	var b bytes.Buffer
 	w := func(s string) { b.WriteString(fmt.Sprintf("%s\n", s)) }
 
-	w("@startuml")
-	for _, s := range spans {
-		if s.Meta.GRPCFullMethodName == "" {
-			continue
+	var draw func(s *span)
+	draw = func(s *span) {
+		if s == nil {
+			return
 		}
 
 		caller := s.Service
@@ -22,16 +22,32 @@ func buildUML(conf config, spans []*span) (string, error) {
 			callee = alias
 		}
 
-		if s.Service == callee {
-			continue
-		}
+		isSkip := s.Meta.GRPCFullMethodName == "" ||
+			s.Service == callee ||
+			!contains(conf.IncludeServices, s.Service) ||
+			contains(conf.ExcludeGRPCServices, extractGRPCServiceFromMethod(s.Meta.GRPCFullMethodName))
 
 		method := path.Base(s.Meta.GRPCFullMethodName)
-		w(fmt.Sprintf(`"%s" -> "%s": %s Request`, caller, callee, method))
-		if *noResponse {
-			continue
+		if !isSkip {
+			w(fmt.Sprintf(`"%s" -> "%s": %s Request`, caller, callee, method))
 		}
-		w(fmt.Sprintf(`"%s" <-- "%s": %s Response`, caller, callee, method))
+
+		for _, c := range s.children {
+			c := c
+			draw(c)
+		}
+
+		if *noResponse {
+			return
+		}
+		if !isSkip {
+			w(fmt.Sprintf(`"%s" <-- "%s": %s Response`, caller, callee, method))
+		}
+	}
+
+	w("@startuml")
+	for _, s := range spans {
+		draw(s)
 	}
 	w("@enduml")
 

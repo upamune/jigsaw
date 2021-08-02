@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"sort"
 
 	"github.com/mattn/go-jsonpointer"
 )
@@ -14,20 +15,65 @@ type span struct {
 	Meta    struct {
 		GRPCFullMethodName string `json:"grpc.method.name"`
 	}
-	Resource string `json:"resource"`
-	Type     string `json:"type"`
+	Resource    string   `json:"resource"`
+	Type        string   `json:"type"`
+	SpanID      string   `json:"span_id"`
+	ParentID    string   `json:"parent_id"`
+	ChildrenIDs []string `json:"children_ids"`
+
+	children []*span
 }
 
-func filterSpans(conf config, ss []*span) []*span {
-	ss2 := ss[:0] // https://github.com/golang/go/wiki/SliceTricks#filtering-without-allocating
+func resolveSpans(ss []*span) []*span {
+	m := make(map[string]*span, len(ss))
 	for _, s := range ss {
 		s := s
-		if contains(conf.IncludeServices, s.Service) &&
-			!contains(conf.ExcludeGRPCServices, extractGRPCServiceFromMethod(s.Meta.GRPCFullMethodName)) {
-			ss2 = append(ss2, s)
+		m[s.SpanID] = s
+	}
+
+	var resolve func(*span) // To call it recursively
+	resolve = func(s *span) {
+		if s == nil {
+			return
+		}
+		if len(s.ChildrenIDs) == 0 {
+			return
+		}
+
+		for _, cid := range s.ChildrenIDs {
+			c, ok := m[cid]
+			if !ok {
+				continue
+			}
+			s.children = append(s.children, c)
+			sort.Slice(s.children, func(i, j int) bool {
+				return s.children[i].Start < s.children[j].Start
+			})
+		}
+
+		for _, c := range s.children {
+			c := c
+			resolve(c)
 		}
 	}
-	return ss2
+
+	for _, s := range ss {
+		if s.ParentID == "0" {
+			resolve(s)
+		}
+	}
+
+	spans := make([]*span, 0, len(m))
+	for _, v := range m {
+		if v.ParentID == "0" {
+			spans = append(spans, v)
+		}
+	}
+
+	sort.Slice(spans, func(i, j int) bool {
+		return spans[i].Start < spans[j].Start
+	})
+	return spans
 }
 
 func parseSpans(r io.Reader) ([]*span, error) {
