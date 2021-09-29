@@ -1,3 +1,4 @@
+type: plantuml
 include_services:
   - v1-service
   - v2-service

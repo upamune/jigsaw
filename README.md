@@ -1,6 +1,6 @@
 ## jigsaw
 
-Automatically generate a sequence diagram from JSON of Trace in Datadog. 
+Automatically generate a sequence diagram from JSON of Trace in Datadog.
 
 ⚠️ Only gRPC calls appear in the sequence diagram.
 
@@ -44,6 +44,7 @@ $ jigsaw trace.json -c config.yaml
 
 ```bash
 $ cat config.yaml
+type: plantuml
 include_services:
   - foo-service
   - bar-service

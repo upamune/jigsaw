@@ -2,9 +2,13 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"io"
 	"log"
 	"os"
+	"strings"
+
+	"github.com/upamune/jigsaw/drawer"
 )
 
 var (
@@ -17,7 +21,7 @@ var (
 
 func main() {
 	if err := run(); err != nil {
-		log.Print(err.Error())
+		log.Printf("ERROR: %s\nVersion: %s\nRevision: %s\n", err.Error(), Version, Revision)
 		os.Exit(1)
 	}
 }
@@ -43,7 +47,17 @@ func run() error {
 
 	resolvedSpans := resolveSpans(spans)
 
-	s, err := buildUML(c, resolvedSpans)
+	var d drawer.Drawer
+	switch strings.ToLower(c.Type) {
+	case drawer.TypePlantUML, "":
+		d = &drawer.PlantUML{}
+	case drawer.TypeMermaid:
+		d = &drawer.Mermaid{}
+	default:
+		return fmt.Errorf("unknown type: %s", c.Type)
+	}
+
+	s, err := buildDiagram(c, d, resolvedSpans)
 	if err != nil {
 		return err
 	}

@@ -7,6 +7,7 @@ import (
 )
 
 type config struct {
+	Type                string   `yaml:"type"`
 	IncludeServices     []string `yaml:"include_services"`
 	ExcludeGRPCServices []string `yaml:"exclude_grpc_services"`
 
