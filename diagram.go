@@ -3,10 +3,27 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"path"
+	"strings"
 
 	"github.com/upamune/jigsaw/drawer"
+	"github.com/vektah/gqlparser/v2/ast"
+	"github.com/vektah/gqlparser/v2/parser"
 )
+
+func createServiceNameMap(m map[string]string, spans []*span) {
+	for _, s := range spans {
+		s := s
+		if s == nil {
+			continue
+		}
+		m[s.SpanID] = s.Service
+		if len(s.children) > 0 {
+			createServiceNameMap(m, s.children)
+		}
+	}
+}
 
 func buildDiagram(conf config, d drawer.Drawer, spans []*span) (string, error) {
 	var b bytes.Buffer
@@ -17,26 +34,23 @@ func buildDiagram(conf config, d drawer.Drawer, spans []*span) (string, error) {
 		b.WriteString(fmt.Sprintf("%s\n", s))
 	}
 
+	serviceNameMap := make(map[string]string)
+	createServiceNameMap(serviceNameMap, spans)
+
 	var draw func(s *span)
 	draw = func(s *span) {
 		if s == nil {
 			return
 		}
 
-		caller := s.Service
-		callee := extractGRPCServiceFromMethod(s.Meta.GRPCFullMethodName)
-		if alias, ok := conf.GRPCServiceAlias[callee]; ok {
-			callee = alias
-		}
+		caller := extractCaller(s, serviceNameMap, conf)
+		callee := extractCallee(s, conf)
+		isSkip := shouldSkipSpan(s, caller, callee, conf)
 
-		isSkip := s.Meta.GRPCFullMethodName == "" ||
-			s.Service == callee ||
-			!contains(conf.IncludeServices, s.Service) ||
-			contains(conf.ExcludeGRPCServices, extractGRPCServiceFromMethod(s.Meta.GRPCFullMethodName))
-
-		method := path.Base(s.Meta.GRPCFullMethodName)
+		method := extractMethodName(s)
 		if !isSkip {
-			s := d.Draw(caller, callee, fmt.Sprintf("%s Request", method))
+			msg := createRequestMsgWithDrawing(s, method)
+			s := d.Draw(caller, callee, msg)
 			w(s)
 		}
 
@@ -45,11 +59,12 @@ func buildDiagram(conf config, d drawer.Drawer, spans []*span) (string, error) {
 			draw(c)
 		}
 
-		if *noResponse {
+		if conf.NoResponse {
 			return
 		}
 		if !isSkip {
-			s := d.Draw(callee, caller, fmt.Sprintf("%s Response", method))
+			msg := createResponseMsgWithDrawing(s, method)
+			s := d.Draw(callee, caller, msg)
 			w(s)
 		}
 	}
@@ -64,8 +79,87 @@ func buildDiagram(conf config, d drawer.Drawer, spans []*span) (string, error) {
 	return b.String(), nil
 }
 
+func convertServiceName(s string, conf config) string {
+	if alias, ok := conf.ServiceAlias[s]; ok {
+		return alias
+	}
+	return s
+}
+
+func extractCaller(s *span, serviceNameMap map[string]string, conf config) string {
+	if caller, ok := serviceNameMap[s.ParentID]; ok {
+		return convertServiceName(caller, conf)
+	}
+	return convertServiceName(s.Service, conf)
+}
+
+func extractCallee(s *span, conf config) string {
+	if s.Meta.GRPCFullMethodName == "" {
+		callee := extractGRPCServiceFromMethod(s.Meta.GRPCFullMethodName)
+		if alias, ok := conf.GRPCServiceAlias[callee]; ok {
+			callee = alias
+		}
+	}
+	return convertServiceName(s.Service, conf)
+}
+
+func extractMethodName(s *span) string {
+	if s.Meta.GRPCFullMethodName != "" {
+		return path.Base(s.Meta.GRPCFullMethodName)
+	}
+	if s.Type == "graphql" {
+		name, err := extractGraphQLOperationName(s.Resource)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "failed to parse graphql query(%s): %v\n", s.Resource, err)
+			return "GraphQL"
+		}
+		return fmt.Sprintf("GraphQL: %s", name)
+	}
+	return s.Resource
+}
+
+func shouldSkipSpan(s *span, caller, callee string, conf config) bool {
+	if conf.IsSkipSelfCall {
+		return caller == callee
+	}
+	if len(conf.IncludeServices) > 0 {
+		fmt.Println(conf.IncludeServices)
+		return !contains(conf.IncludeServices, s.Service)
+	}
+	return contains(conf.ExcludeGRPCServices, extractGRPCServiceFromMethod(s.Meta.GRPCFullMethodName))
+}
+
 func extractGRPCServiceFromMethod(method string) string {
 	return path.Dir(method)
+}
+
+func extractGraphQLOperationName(query string) (string, error) {
+	doc, err := parser.ParseQuery(&ast.Source{Input: query})
+	if err != nil {
+		return "", err
+	}
+	var names []string
+	for _, op := range doc.Operations {
+		names = append(names, op.Name)
+	}
+	return strings.Join(names, ","), nil
+}
+
+func createRequestMsgWithDrawing(s *span, method string) string {
+	if s.Type == "" || s.Type == "sql" {
+		return method
+	}
+	return fmt.Sprintf("%s Request", method)
+}
+
+func createResponseMsgWithDrawing(s *span, method string) string {
+	if s.Type == "" {
+		return method
+	}
+	if s.Type == "sql" {
+		return ""
+	}
+	return fmt.Sprintf("%s Response", method)
 }
 
 func contains(slice []string, item string) bool {
