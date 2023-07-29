@@ -4,6 +4,34 @@
 
 Jigsaw is an open-source tool that allows you to generate sequence diagrams automatically from Datadog Trace JSON.
 
+### Usage
+
+You can get a trace as a JSON via `https://app.datadoghq.com/api/v1/trace/TRACE_ID`.
+
+> **Pro-tip**
+> You can use a handy bookmarklet from [this page](https://upamune.github.io/jigsaw/) to open JSON files from the Trace page
+
+```bash
+$ go get -u github.com/upamune/jigsaw
+$ jigsaw trace.json
+```
+
+CLI Flags:
+
+```bash
+Usage of jigsaw:
+  -config string
+        path of config
+  -debug
+        log debug information
+  -no-response
+        whether to draw response sequences
+  -skip-self-call
+        whether to skip self call (default true)
+  -type string
+        output type ('mermaid' or 'plantuml') (default "mermaid")
+```
+
 ### Example
 
 #### w/ response
@@ -59,16 +87,21 @@ sequenceDiagram
     v2-service->>v3-service: Pong Request
 ```
 
-### Usage
-
-You can get a trace as a JSON via `https://app.datadoghq.com/api/v1/trace/TRACE_ID`.
-
-```bash
-$ go get -u github.com/upamune/jigsaw
-$ jigsaw trace.json
-```
-
 ### Configuration
+
+The config file is written in YAML format, and the file path is specified with the `-config` flag.
+There are options with the same name as some command line flags, but if they are set at the same time, the value of the
+command line flag will take precedence.
+
+| Name                  | Description                                                                        | Default |
+|-----------------------|------------------------------------------------------------------------------------|---------|
+| include_services      | A list of services to include in the diagram. If empty, all services are included. | []      |
+| exclude_grpc_services | A list of gRPC services to exclude in the diagram.                                 | []      |
+| grpc_service_alias    | A map of gRPC service alias.                                                       | {}      |
+| service_alias         | A map of service alias.                                                            | {}      |
+| is_skip_self_call     | Whether to skip self call.                                                         | true    |
+| no_response           | Whether to draw response sequences.                                                | false   |
+| debug                 | Whether to output debug information.                                               | false   |
 
 ```bash
 $ cat config.yaml
@@ -80,4 +113,9 @@ exclude_grpc_services:
 grpc_serivce_alias:
   /foo.bar.v1.Service: v1-serivce
   /foo.bar.v2.Service: v2-serivce
+service_alias:
+  hoge-mysql: mysql
+is_skip_self_call: false
+no_response: true
+debug: true
 ```
