@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -33,6 +34,9 @@ func (cli *CLI) Run(args []string) error {
 		ff.WithEnvVarPrefix("JIGSAW"),
 		ff.WithIgnoreUndefined(true),
 	); err != nil {
+		if errors.Is(err, flag.ErrHelp) {
+			return nil
+		}
 		return fmt.Errorf("failed to parse flags: %w", err)
 	}
 
