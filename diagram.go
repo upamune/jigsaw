@@ -94,11 +94,12 @@ func extractCaller(s *span, serviceNameMap map[string]string, conf config) strin
 }
 
 func extractCallee(s *span, conf config) string {
-	if s.Meta.GRPCFullMethodName == "" {
+	if s.Meta.GRPCFullMethodName != "" {
 		callee := extractGRPCServiceFromMethod(s.Meta.GRPCFullMethodName)
 		if alias, ok := conf.GRPCServiceAlias[callee]; ok {
 			callee = alias
 		}
+		return callee
 	}
 	return convertServiceName(s.Service, conf)
 }
@@ -123,7 +124,6 @@ func shouldSkipSpan(s *span, caller, callee string, conf config) bool {
 		return caller == callee
 	}
 	if len(conf.IncludeServices) > 0 {
-		fmt.Println(conf.IncludeServices)
 		return !contains(conf.IncludeServices, s.Service)
 	}
 	return contains(conf.ExcludeGRPCServices, extractGRPCServiceFromMethod(s.Meta.GRPCFullMethodName))
