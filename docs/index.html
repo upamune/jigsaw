@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>jigsaw</title>
+    <link rel="stylesheet" href="https://unpkg.com/awsm.css/dist/awsm.min.css">
+</head>
+<body>
+<header>
+    <img src="https://i.gyazo.com/cc66f61c68034ca8b8617d818e5dbd99.png">
+</header>
+<main>
+    <div>
+        <h1>upamune/jigsaw</h1>
+        <p>
+            <iframe src="https://ghbtns.com/github-btn.html?user=upamune&repo=jigsaw&type=star&count=true&size=large"
+                    frameborder="0" scrolling="0" width="170" height="30" title="GitHub"></iframe>
+        </p>
+        <p>
+            Jigsaw is an open-source tool that allows you to generate sequence diagrams automatically from Datadog Trace
+            JSON.
+        </p>
+    </div>
+    <div>
+        <h3>Bookmaklet</h3>
+        <p>
+            👇 Just drag and drop this onto your bookmark bar!
+        </p>
+        <p>
+            <a href="javascript:(function()%7Bconst%20origin%20%3D%20window.location.origin%3B%0Aconst%20params%20%3D%20new%20URLSearchParams(window.location.search)%3B%0Aconst%20traceID%20%3D%20params.get('traceID')%3B%0Aconst%20traceURL%20%3D%20%60%24%7Borigin%7D%2Fapi%2Fv1%2Ftrace%2F%24%7BtraceID%7D%60%3B%0Awindow.open(traceURL%2C%20'_blank').focus()%3B%7D)()%3B">trace2json</a>
+        </p>
+        <p>
+            Click it when you're on the Datadog Trace details page!
+            Doing this will display the Trace JSON page.
+        </p>
+        <p>
+            This is the code before minifying for the bookmarklet.
+        </p>
+        <pre>
+        <code>const origin = window.location.origin;
+const params = new URLSearchParams(window.location.search);
+const traceID = params.get('traceID');
+const traceURL = `${origin}/api/v1/trace/${traceID}`;
+window.open(traceURL, '_blank').focus();</code>
+        </pre>
+    </div>
+</main>
+</body>
+</html>
