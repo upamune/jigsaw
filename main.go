@@ -1,91 +1,33 @@
 package main
 
 import (
-	"flag"
 	"fmt"
-	"io"
-	"log"
 	"os"
-	"strings"
+)
 
-	"github.com/upamune/jigsaw/drawer"
+const (
+	ExitOK int = 0
+	ExitNG int = 1
 )
 
 var (
 	Version  string
 	Revision string
-
-	configPath = flag.String("config", "config.yaml", "path of config")
-	noResponse = flag.Bool("no-response", false, "whether to draw response sequences")
 )
 
 func main() {
-	if err := run(); err != nil {
-		log.Printf("ERROR: %s\nVersion: %s\nRevision: %s\n", err.Error(), Version, Revision)
-		os.Exit(1)
-	}
+	os.Exit(run())
 }
 
-func run() error {
-	flag.Parse()
-
-	c, err := readConfig(*configPath)
-	if err != nil {
-		return err
+func run() int {
+	cli := &CLI{
+		Stdout: os.Stdout,
+		Stderr: os.Stderr,
+		Stdin:  os.Stdin,
 	}
-
-	r, err := readTraceJSON()
-	if err != nil {
-		return err
+	if err := cli.Run(os.Args[1:]); err != nil {
+		fmt.Fprintf(cli.Stderr, "ERROR: %s\nVersion: %s\nRevision: %s\n", err.Error(), Version, Revision)
+		return ExitNG
 	}
-	defer r.Close()
-
-	spans, err := parseSpans(r)
-	if err != nil {
-		return err
-	}
-
-	resolvedSpans := resolveSpans(spans)
-
-	var d drawer.Drawer
-	switch strings.ToLower(c.Type) {
-	case drawer.TypePlantUML, "":
-		d = &drawer.PlantUML{}
-	case drawer.TypeMermaid:
-		d = &drawer.Mermaid{}
-	default:
-		return fmt.Errorf("unknown type: %s", c.Type)
-	}
-
-	s, err := buildDiagram(c, d, resolvedSpans)
-	if err != nil {
-		return err
-	}
-
-	if _, err := os.Stdout.WriteString(s); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func readTraceJSON() (io.ReadCloser, error) {
-	var filename string
-	if args := flag.Args(); len(args) > 0 {
-		filename = args[0]
-	}
-
-	var r io.ReadCloser
-	switch filename {
-	case "", "-":
-		r = os.Stdin
-	default:
-		f, err := os.Open(filename)
-		if err != nil {
-			return nil, err
-		}
-		r = f
-	}
-
-	return r, nil
+	return ExitOK
 }

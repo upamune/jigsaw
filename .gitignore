@@ -33,3 +33,5 @@ config.yaml
 !example/trace.json
 
 jigsaw
+
+*.mmmd

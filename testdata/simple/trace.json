@@ -1,0 +1,35 @@
+{
+    "trace": {
+        "spans": {
+            "1234567890": {
+                "span_id": "1234567890",
+                "service": "v1-service",
+                "start": 1627781875.00000,
+                "parent_id": "0",
+                "meta": {
+                    "grpc.method.name": "/foo.bar.v2.Service/Ping"
+                },
+                "children_ids": ["1234567892"],
+                "type": "rpc"
+            },
+            "1234567891": {
+                "span_id": "1234567891",
+                "service": "v0-service",
+                "start": 1627781876.00000,
+                "meta": {
+                    "grpc.method.name": "/foo.bar.v0.Service/Ping"
+                },
+                "type": "rpc"
+            },
+            "1234567892": {
+                "span_id": "1234567892",
+                "service": "v2-service",
+                "start": 1627781877.00000,
+                "meta": {
+                    "grpc.method.name": "/foo.bar.v3.Service/Pong"
+                },
+                "type": "rpc"
+            }
+        }
+    }
+}

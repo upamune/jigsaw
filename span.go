@@ -21,6 +21,7 @@ type span struct {
 	ParentID    string   `json:"parent_id"`
 	ChildrenIDs []string `json:"children_ids"`
 
+	isRoot   bool
 	children []*span
 }
 
@@ -58,14 +59,14 @@ func resolveSpans(ss []*span) []*span {
 	}
 
 	for _, s := range ss {
-		if s.ParentID == "0" {
+		if s.isRoot {
 			resolve(s)
 		}
 	}
 
 	spans := make([]*span, 0, len(m))
 	for _, v := range m {
-		if v.ParentID == "0" {
+		if v.isRoot {
 			spans = append(spans, v)
 		}
 	}
@@ -80,6 +81,13 @@ func parseSpans(r io.Reader) ([]*span, error) {
 	var p interface{}
 	if err := json.NewDecoder(r).Decode(&p); err != nil {
 		return nil, err
+	}
+
+	var rootSpanID string
+	if rv, err := jsonpointer.Get(p, "/trace/root_id"); err == nil {
+		if id, ok := rv.(string); ok {
+			rootSpanID = id
+		}
 	}
 
 	rv, err := jsonpointer.Get(p, "/trace/spans")
@@ -107,6 +115,11 @@ func parseSpans(r io.Reader) ([]*span, error) {
 			return nil, err
 		}
 
+		if s.SpanID == rootSpanID {
+			s.isRoot = true
+		} else if rootSpanID == "" && s.ParentID == "0" {
+			s.isRoot = true
+		}
 		spans = append(spans, &s)
 	}
 
