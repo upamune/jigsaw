@@ -1,5 +1,7 @@
 ## jigsaw
 
+![logo](https://i.gyazo.com/cc66f61c68034ca8b8617d818e5dbd99.png)
+
 Jigsaw is an open-source tool that allows you to generate sequence diagrams automatically from Datadog Trace JSON.
 
 ### Example
