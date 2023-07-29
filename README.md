@@ -14,11 +14,7 @@ You can get a trace as a JSON via `https://app.datadoghq.com/api/v1/trace/TRACE_
 ```bash
 $ go get -u github.com/upamune/jigsaw
 $ jigsaw trace.json
-```
-
-CLI Flags:
-
-```bash
+$ jigsaw -help                                                                                (git)-[fix-help-error-handling]
 Usage of jigsaw:
   -config string
         path of config
