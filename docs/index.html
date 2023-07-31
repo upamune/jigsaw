@@ -30,7 +30,7 @@
             👇 Just drag and drop this onto your bookmark bar!
         </p>
         <p>
-            <a href="javascript:(function()%7Bconst%20origin%20%3D%20window.location.origin%3B%0Aconst%20params%20%3D%20new%20URLSearchParams(window.location.search)%3B%0Aconst%20traceID%20%3D%20params.get('traceID')%3B%0Aconst%20traceURL%20%3D%20%60%24%7Borigin%7D%2Fapi%2Fv1%2Ftrace%2F%24%7BtraceID%7D%60%3B%0Awindow.open(traceURL%2C%20'_blank').focus()%3B%7D)()%3B">trace2json</a>
+            <a href="javascript:(function()%7Bconst%20origin%20%3D%20window.location.origin%3B%0Aconst%20params%20%3D%20new%20URLSearchParams(window.location.search)%3B%0Alet%20traceID%20%3D%20params.get('traceID')%3B%0Aif%20(traceID%20%3D%3D%3D%20null)%20%7B%0A%20%20const%20path%20%3D%20window.location.pathname%3B%0A%20%20if%20(!path.startsWith('%2Fapm%2Ftrace%2F'))%20return%3B%0A%20%20traceID%20%3D%20path.replace('%2Fapm%2Ftrace%2F'%2C%20'')%3B%0A%7D%0Aconst%20traceURL%20%3D%20%60%24%7Borigin%7D%2Fapi%2Fv1%2Ftrace%2F%24%7BtraceID%7D%60%3B%0Awindow.open(traceURL%2C%20'_blank').focus()%3B%7D)()%3B">trace2json</a>
         </p>
         <p>
             Click it when you're on the Datadog Trace details page!
@@ -42,7 +42,12 @@
         <pre>
         <code>const origin = window.location.origin;
 const params = new URLSearchParams(window.location.search);
-const traceID = params.get('traceID');
+let traceID = params.get('traceID');
+if (traceID === null) {
+  const path = window.location.pathname;
+  if (!path.startsWith('/apm/trace/')) return;
+  traceID = path.replace('/apm/trace/', '');
+}
 const traceURL = `${origin}/api/v1/trace/${traceID}`;
 window.open(traceURL, '_blank').focus();</code>
         </pre>
