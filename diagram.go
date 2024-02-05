@@ -120,8 +120,8 @@ func extractMethodName(s *span) string {
 }
 
 func shouldSkipSpan(s *span, caller, callee string, conf config) bool {
-	if conf.IsSkipSelfCall {
-		return caller == callee
+	if conf.IsSkipSelfCall && caller == callee {
+		return true
 	}
 	if len(conf.IncludeServices) > 0 {
 		return !contains(conf.IncludeServices, s.Service)
