@@ -7,3 +7,4 @@ grpc_serivce_alias:
   /foo.bar.v1.Service: v1-service
   /foo.bar.v2.Service: v2-service
   /foo.bar.v3.Service: v3-service
+  /foo.bar.v4.Service: v4-service

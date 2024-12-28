@@ -9,7 +9,7 @@
                 "meta": {
                     "grpc.method.name": "/foo.bar.v2.Service/Ping"
                 },
-                "children_ids": ["1234567892"],
+                "children_ids": ["1234567892", "1234567893"],
                 "type": "rpc"
             },
             "1234567891": {
@@ -27,6 +27,15 @@
                 "start": 1627781877.00000,
                 "meta": {
                     "grpc.method.name": "/foo.bar.v3.Service/Pong"
+                },
+                "type": "rpc"
+            },
+            "1234567893": {
+                "span_id": "1234567893",
+                "service": "v3-service",
+                "start": 1627781878.00000,
+                "meta": {
+                    "grpc.method.name": "/foo.bar.v4.Service/Pong"
                 },
                 "type": "rpc"
             }
